@@ -50,7 +50,7 @@ The app uses gamification, quizzes, citation challenges, and progress tracking t
 
 ### Database
 - **PostgreSQL**
-- **Prisma ORM**
+- **Supabase**
 
 ### Hosting & Services
 - Expo EAS (build & deployment)
