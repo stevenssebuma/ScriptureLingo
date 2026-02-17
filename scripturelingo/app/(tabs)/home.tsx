@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
 
 import { FadeInView, PrimaryButton, Screen, SectionCard, TopBar, palette } from '@/components/wireframe-ui';
 
@@ -12,7 +12,9 @@ export default function HomeScreen() {
         right={
           <View style={styles.rightIcons}>
             <Ionicons name="notifications" size={18} color={palette.blue} />
-            <Ionicons name="menu" size={20} color={palette.blue} />
+            <Pressable onPress={() => router.push('/settings')} hitSlop={10}>
+              <Ionicons name="settings" size={20} color={palette.blue} />
+            </Pressable>
           </View>
         }
       />

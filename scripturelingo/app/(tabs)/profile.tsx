@@ -2,6 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { FadeInView, PrimaryButton, Screen, SectionCard, TopBar, palette } from '@/components/wireframe-ui';
+import { router } from 'expo-router';
+
+const month = new Date().toLocaleString('default', { month: 'long' });
 
 export default function ProfileScreen() {
   return (
@@ -39,11 +42,18 @@ export default function ProfileScreen() {
               <Ionicons name="ribbon" size={34} color="#909090" />
               <Text style={styles.badgeText}>Scripture Scholar</Text>
             </SectionCard>
+            <SectionCard style={styles.badge}>
+              <Ionicons name="trophy" size={34} color="#909090" />
+              <Text style={styles.badgeText}>1st Place for {month}</Text>
+            </SectionCard>
           </View>
         </FadeInView>
 
         <FadeInView delay={260}>
           <PrimaryButton label="View Stats" color="#80A9CB" />
+        </FadeInView>
+        <FadeInView delay={260}>
+          <PrimaryButton label="Logout" color="#80A9CB" onPress={() => router.push('/')} />
         </FadeInView>
       </View>
     </Screen>

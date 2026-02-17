@@ -20,6 +20,10 @@ expo-env.d.ts
 
 # Backend
 Backend/.env
+.env
+.env.*
+!*.env.example
+!Backend/.env.example
 
 # Metro
 .metro-health-check*
