@@ -1,13 +1,44 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState, useEffect } from 'react';
+import { Pressable, StyleSheet, Text, View, Alert, ActivityIndicator } from 'react-native';
 
 import { FadeInView, PrimaryButton, Screen, TopBar, palette } from '@/components/wireframe-ui';
+import { supabase } from '@/lib/supabase';
+import { setUserGoal } from '@/lib/dailyGoalService';
 
-const options = ['5 minutes', '10 minutes', '15 minutes'];
+const options = [
+  { label: '5 minutes', value: 5 },
+  { label: '10 minutes', value: 10 },
+  { label: '15 minutes', value: 15 },
+];
 
 export default function DailyGoalScreen() {
-  const [selected, setSelected] = useState('10 minutes');
+  const [selected, setSelected] = useState(options[1]); // Default to 10 minutes
+  const [loading, setLoading] = useState(false);
+
+  const handleContinue = async () => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        Alert.alert('Error', 'User not authenticated');
+        return;
+      }
+
+      // Save the user's daily goal
+      const success = await setUserGoal(user.id, selected.value);
+      if (success) {
+        router.replace('/(tabs)/home');
+      } else {
+        Alert.alert('Error', 'Failed to save daily goal. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error saving goal:', error);
+      Alert.alert('Error', 'An unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Screen backgroundColor={palette.mint}>
@@ -17,19 +48,26 @@ export default function DailyGoalScreen() {
         <View>
           <FadeInView delay={20}>
             <Text style={styles.prompt}>How much time would you like each day?</Text>
+            <Text style={styles.subtext}>
+              Aim for 35-105 minutes per week. Starting with a realistic daily goal helps you stay consistent.
+            </Text>
           </FadeInView>
 
           <View style={styles.optionWrap}>
             {options.map((option, index) => {
-              const isSelected = selected === option;
+              const isSelected = selected.value === option.value;
               return (
-                <FadeInView key={option} delay={80 + index * 60}>
+                <FadeInView key={option.value} delay={80 + index * 60}>
                   <Pressable
-                    key={option}
                     style={[styles.row, isSelected && styles.rowSelected]}
                     onPress={() => setSelected(option)}>
                     <View style={[styles.radio, isSelected && styles.radioSelected]} />
-                    <Text style={styles.rowText}>{option}</Text>
+                    <View style={styles.optionContent}>
+                      <Text style={styles.rowText}>{option.label}</Text>
+                      {option.value === 10 && (
+                        <Text style={styles.recommendedLabel}>RECOMMENDED</Text>
+                      )}
+                    </View>
                   </Pressable>
                 </FadeInView>
               );
@@ -38,7 +76,11 @@ export default function DailyGoalScreen() {
         </View>
 
         <FadeInView delay={320}>
-          <PrimaryButton label="Start Learning" onPress={() => router.replace('/(tabs)/home')} />
+          <PrimaryButton 
+            label={loading ? "Saving..." : "Start Learning"} 
+            onPress={handleContinue}
+            disabled={loading}
+          />
         </FadeInView>
       </View>
     </Screen>
@@ -57,6 +99,12 @@ const styles = StyleSheet.create({
     color: '#5B7D66',
     fontSize: 16,
     fontWeight: '600',
+  },
+  subtext: {
+    color: '#7A9985',
+    fontSize: 14,
+    marginTop: 8,
+    lineHeight: 20,
   },
   optionWrap: {
     marginTop: 14,
@@ -89,9 +137,19 @@ const styles = StyleSheet.create({
     borderColor: palette.blue,
     backgroundColor: palette.blue,
   },
+  optionContent: {
+    flex: 1,
+  },
   rowText: {
     color: '#425A50',
     fontSize: 18,
     fontWeight: '600',
+  },
+  recommendedLabel: {
+    color: '#27AE60',
+    fontSize: 11,
+    fontWeight: '700',
+    marginTop: 2,
+    letterSpacing: 0.5,
   },
 });
